@@ -6,6 +6,7 @@ module Sigym4.GDAL (
 
 import Sigym4.GeoReference
 import OSGeo.GDAL as X
+import OSGeo.OSR as X
 
 
 createGeoreferencedDataset geoRef dName dOpts nBands fPath = do
@@ -13,7 +14,10 @@ createGeoreferencedDataset geoRef dName dOpts nBands fPath = do
       gt          = geoTransform geoRef
   ds <- create dName fPath nx ny nBands dOpts
   setDatasetGeotransform ds gt
-  setDatasetProjection ds (srs geoRef)
+  case fromProj4 (srs geoRef) of
+    Right sr -> do
+      setDatasetProjection ds (toWkt sr)
+    _ -> return()
   return ds
 
 geoTransform :: GeoReference -> Geotransform
