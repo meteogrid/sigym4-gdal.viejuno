@@ -1,28 +1,30 @@
 {-# LANGUAGE RecordWildCards #-}
 module Sigym4.GDAL (
     createGeoreferencedDataset
-  , module X
+  , module GDAL
+  , module OSR
 ) where
 
-import Sigym4.GeoReference
-import OSGeo.GDAL as X
-import OSGeo.OSR as X
+import Sigym4.Geometry
+import OSGeo.GDAL as GDAL
+import OSGeo.OSR as OSR
 
 
 createGeoreferencedDataset geoRef dName dOpts nBands fPath = do
-  let Shape nx ny = shape geoRef
-      gt          = geoTransform geoRef
+  let Size (V2 nx ny) = grSize geoRef
+      gt              = toGDALGeoTrans $ grTransform geoRef
+      srs             = case grSrs geoRef of
+                          SrsProj4 proj4 -> fromProj4 proj4
+                          SrsEPSG epsg   -> fromEPSG epsg
   ds <- create dName fPath nx ny nBands dOpts
   setDatasetGeotransform ds gt
-  case fromProj4 (srs geoRef) of
-    Right sr -> do
-      setDatasetProjection ds (toWkt sr)
-    _ -> return()
+  case srs of
+    Left e     -> fail $ show e
+    Right srs' -> setDatasetProjection ds (toWkt srs')
   return ds
 
-geoTransform :: GeoReference -> Geotransform
-geoTransform gr@GeoReference{..} = Geotransform x0 dx 0 y1 0 (-dy)
+toGDALGeoTrans :: GeoTransform V2 -> GDAL.Geotransform
+toGDALGeoTrans gt = Geotransform a b c d e f
   where
-    Shape dx dy = pixelShape gr
-    x0 = minx extent
-    y1 = maxy extent
+    V2 (V2 b e) (V2 c f) = gtMatrix gt
+    V2 a d               = gtOrigin gt
