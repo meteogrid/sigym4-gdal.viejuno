@@ -2,26 +2,27 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                sigym4-gdal
-version:             0.1.1.0
+version:             0.1.2
 synopsis:            Utilities for interfacing with GDAL
--- description:         
+description:         Utilities for interfacing with GDAL
 homepage:            https://github.com/meteogrid/sigym4-gdal
 license:             MIT
 license-file:        LICENSE
 author:              Alberto Valverde
 maintainer:          alberto@meteogrid.com
--- copyright:           
--- category:            
+copyright:           2014-2015 Meteogrid
+category:            Data
 build-type:          Simple
--- extra-source-files:  
 cabal-version:       >=1.10
+
+source-repository head
+  type:              git
+  location:          https://github.com/meteogrid/sigym4-gdal
 
 library
   exposed-modules:     Sigym4.GDAL
-  -- other-modules:       
-  -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8
+  build-depends:       base             >=4.7 && <5
                      , bindings-gdal
-                     , sigym4-geometry
-  -- hs-source-dirs:      
+                     , sigym4-geometry  >= 0.2.1
   default-language:    Haskell2010
+  ghc-options:         -Wall
